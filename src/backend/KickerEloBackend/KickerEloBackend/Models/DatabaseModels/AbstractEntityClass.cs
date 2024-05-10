@@ -8,9 +8,9 @@ namespace KickerEloBackend.Models.DatabaseModels
     internal abstract class AbstractEntityClass : ITableEntity
     {
         [JsonIgnore]
-        public string RowKey { get; set; } = default!;
+        public string RowKey { get; set; }
         [JsonIgnore]
-        public string PartitionKey { get; set; } = default!;
+        public string PartitionKey { get; set; } = "default";
         [JsonIgnore]
         public ETag ETag { get; set; } = default!;
         [JsonIgnore]

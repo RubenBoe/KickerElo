@@ -6,7 +6,7 @@ namespace KickerEloBackend.Models.DatabaseModels
     {
         public int Id { get; set; }
         public string ClientName { get; set; }
-        public DateTime CreationDate { get; set; }
+        public DateTime CreationDate { get; set; } = DateTime.UtcNow;
         public string ClientToken { get; set; }
     }
 }

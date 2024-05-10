@@ -9,6 +9,8 @@ using KickerEloBackend.Models.DatabaseModels;
 using Azure.Data.Tables;
 using System;
 using KickerEloBackend.Models;
+using System.Linq;
+using KickerEloBackend.Models.Helpers;
 
 namespace KickerEloBackend
 {
@@ -22,13 +24,21 @@ namespace KickerEloBackend
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var client = JsonSerializer.Deserialize<Client>(requestBody);
 
-            TableServiceClient tableServiceClient = new TableServiceClient(Environment.GetEnvironmentVariable("TABLE_CONNECTION_STRING"));
+            TableServiceClient tableServiceClient = TablesHelper.GetTableServiceClient();
 
-            var currentClients = await tableServiceClient.GetTableClient(DatabaseTables.ClientsTable)
+            var clientsTable = tableServiceClient.GetTableClient(DatabaseTables.ClientsTable);
+            var currentClients = clientsTable.Query<Client>(x => true);
+            var currentHighestID = currentClients.Count() > 0 ? currentClients.Select(c => c.Id).Max() : 0;
 
-            string responseMessage = $"Created {client.ClientName} with ID {client.Id}.";
+            // Set new client's ID to the highest one available
+            client.Id = currentHighestID + 1;
+            client.RowKey = client.Id.ToString();
+            var newClientGuid = Guid.NewGuid().ToString();
+            client.ClientToken = newClientGuid;
 
-            return new OkObjectResult(responseMessage);
+            await clientsTable.AddEntityAsync(client);
+
+            return new OkObjectResult(client);
         }
     }
 }

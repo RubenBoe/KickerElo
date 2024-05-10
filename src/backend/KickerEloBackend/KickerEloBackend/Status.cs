@@ -7,6 +7,7 @@ using Azure.Data.Tables;
 using System;
 using System.Web.Http;
 using KickerEloBackend.Models;
+using KickerEloBackend.Models.Helpers;
 
 namespace KickerEloBackend
 {
@@ -16,7 +17,7 @@ namespace KickerEloBackend
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req)
         {
-            TableServiceClient client = new TableServiceClient(Environment.GetEnvironmentVariable("TABLE_CONNECTION_STRING"));
+            TableServiceClient client = TablesHelper.GetTableServiceClient();
 
             TableClient clientsTable = client.GetTableClient(
                 tableName: DatabaseTables.ClientsTable
