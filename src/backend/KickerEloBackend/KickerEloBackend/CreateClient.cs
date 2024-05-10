@@ -5,6 +5,9 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using System.Text.Json;
+using KickerEloBackend.Models.DatabaseModels;
+using Azure.Data.Tables;
+using System;
 using KickerEloBackend.Models;
 
 namespace KickerEloBackend
@@ -18,6 +21,10 @@ namespace KickerEloBackend
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var client = JsonSerializer.Deserialize<Client>(requestBody);
+
+            TableServiceClient tableServiceClient = new TableServiceClient(Environment.GetEnvironmentVariable("TABLE_CONNECTION_STRING"));
+
+            var currentClients = await tableServiceClient.GetTableClient(DatabaseTables.ClientsTable)
 
             string responseMessage = $"Created {client.ClientName} with ID {client.Id}.";
 
