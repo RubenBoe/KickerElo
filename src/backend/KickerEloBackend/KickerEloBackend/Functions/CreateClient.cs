@@ -12,7 +12,7 @@ using KickerEloBackend.Models;
 using System.Linq;
 using KickerEloBackend.Models.Helpers;
 
-namespace KickerEloBackend
+namespace KickerEloBackend.Functions
 {
     public static class CreateClient
     {

@@ -8,8 +8,17 @@ namespace KickerEloBackend.Models.DatabaseModels
 {
     internal class PlayerElo : AbstractEntityClass
     {
-        public int PlayerID { get; set; }
-        public int SeasonID { get; set; }
+        public PlayerElo() { }
+        public PlayerElo(string PlayerID, string SeasonID, int EloNumber) 
+        {
+            this.PlayerID = PlayerID;
+            this.SeasonID = SeasonID;
+            this.EloNumber = EloNumber;
+            LastUpdated = DateTime.UtcNow;
+            RowKey = $"{SeasonID}_{PlayerID}";
+        }
+        public string PlayerID { get; set; }
+        public string SeasonID { get; set; }
         public int EloNumber { get; set; }
         public DateTime LastUpdated { get; set; }
     }

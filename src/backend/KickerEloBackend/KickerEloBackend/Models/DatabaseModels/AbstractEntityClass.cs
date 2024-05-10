@@ -14,6 +14,6 @@ namespace KickerEloBackend.Models.DatabaseModels
         [JsonIgnore]
         public ETag ETag { get; set; } = default!;
         [JsonIgnore]
-        public DateTimeOffset? Timestamp { get; set; } = default!;
+        public DateTimeOffset? Timestamp { get; set; } = DateTimeOffset.UtcNow;
     }
 }
