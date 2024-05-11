@@ -20,17 +20,17 @@ namespace KickerEloBackend.Models.Helpers
         // Number used to divide by in the calculation of the expectation value. This is a random number. In the chess system, 400 is chosen
         private const int divisor = 400;
 
-        public static async Task<GameResults> CalculateAndUpdateResults(TableServiceClient tableService, Game game, EnterGameCommand gameCommand)
+        public static async Task<GameResult> CalculateAndUpdateResults(TableServiceClient tableService, Game game, EnterGameCommand gameCommand)
         {
-            var result = new GameResults()
+            var result = new GameResult()
             {
                 Date = game.Date,
                 GameID = game.GameID,
-                TeamResults = gameCommand.Teams.Select(team => new TeamResult()
+                TeamResults = gameCommand.Teams.Select(team => new TeamGameResult()
                 {
                     TeamNumber = team.TeamNumber,
                     Points = team.Points,
-                    PlayerResults = team.PlayerIDs.Select(p => new PlayerResult() { PlayerID = p })
+                    PlayerResults = team.PlayerIDs.Select(p => new PlayerGameResult() { PlayerID = p })
                 }),
             };
 
@@ -45,8 +45,8 @@ namespace KickerEloBackend.Models.Helpers
 
             var eloTable = tableService.GetTableClient(DatabaseTables.PlayerEloTable);
 
-            var winnerTeamPlayerResults = new List<PlayerResult>();
-            var loserTeamPlayerResults = new List<PlayerResult>();
+            var winnerTeamPlayerResults = new List<PlayerGameResult>();
+            var loserTeamPlayerResults = new List<PlayerGameResult>();
             // Update player games and player elos
             foreach (var playerId in winnerTeam.PlayerIDs)
             {
@@ -57,7 +57,8 @@ namespace KickerEloBackend.Models.Helpers
                     PlayerID = playerId,
                     Points = winnerTeam.Points,
                     Team = winnerTeam.TeamNumber,
-                    RowKey = $"{game.GameID}_{playerId}"
+                    RowKey = $"{game.GameID}_{playerId}",
+                    ClientID = game.ClientID
                 });
                 var currentElo = GetCurrentElo(tableService, game.SeasonID, playerId);
                 var newElo = currentElo.EloNumber + winnerTeamEloGain;
@@ -77,7 +78,8 @@ namespace KickerEloBackend.Models.Helpers
                     PlayerID = playerId,
                     Points = loserTeam.Points,
                     Team = loserTeam.TeamNumber,
-                    RowKey = $"{game.GameID}_{playerId}"
+                    RowKey = $"{game.GameID}_{playerId}",
+                    ClientID = game.ClientID
                 });
                 var currentElo = GetCurrentElo(tableService, game.SeasonID, playerId);
                 var newElo = currentElo.EloNumber - winnerTeamEloGain;

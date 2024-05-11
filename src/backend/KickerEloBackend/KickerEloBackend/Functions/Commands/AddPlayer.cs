@@ -13,7 +13,7 @@ using KickerEloBackend.Models.DatabaseModels;
 using KickerEloBackend.Models;
 using System.Linq;
 
-namespace KickerEloBackend.Functions
+namespace KickerEloBackend.Functions.Commands
 {
     public static class AddPlayer
     {

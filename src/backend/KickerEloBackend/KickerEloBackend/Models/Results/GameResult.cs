@@ -3,21 +3,21 @@ using System.Collections.Generic;
 
 namespace KickerEloBackend.Models.Results
 {
-    internal class GameResults
+    internal class GameResult
     {
         public string GameID {  get; set; }
         public DateTime Date { get; set; }
-        public IEnumerable<TeamResult> TeamResults { get; set; }
+        public IEnumerable<TeamGameResult> TeamResults { get; set; }
     }
 
-    internal class TeamResult
+    internal class TeamGameResult
     {
-        public IEnumerable<PlayerResult> PlayerResults { get; set; }
+        public IEnumerable<PlayerGameResult> PlayerResults { get; set; }
         public int TeamNumber { get; set; }
         public int Points { get; set; }
     }
 
-    internal class PlayerResult
+    internal class PlayerGameResult
     {
         public string PlayerID { get; set; }
         public int EloGain { get; set; }

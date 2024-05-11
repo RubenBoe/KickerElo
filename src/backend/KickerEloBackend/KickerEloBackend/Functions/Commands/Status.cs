@@ -9,7 +9,7 @@ using System.Web.Http;
 using KickerEloBackend.Models;
 using KickerEloBackend.Models.Helpers;
 
-namespace KickerEloBackend.Functions
+namespace KickerEloBackend.Functions.Commands
 {
     public static class Status
     {

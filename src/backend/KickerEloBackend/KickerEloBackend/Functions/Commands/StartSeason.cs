@@ -14,7 +14,7 @@ using KickerEloBackend.Models.DatabaseModels;
 using System.Linq;
 using Azure;
 
-namespace KickerEloBackend.Functions
+namespace KickerEloBackend.Functions.Commands
 {
     public static class StartSeason
     {
@@ -34,7 +34,7 @@ namespace KickerEloBackend.Functions
             var seasons = seasonsTable.Query<Season>(x => x.ClientID == client.Id);
 
             var newSeasonNumber = 1;
-            if(seasons.Any()) 
+            if (seasons.Any())
             {
                 var currentSeason = seasons.First(s => s.EndDate == null);
 

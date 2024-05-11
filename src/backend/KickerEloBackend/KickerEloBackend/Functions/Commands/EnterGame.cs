@@ -13,7 +13,7 @@ using KickerEloBackend.Models;
 using KickerEloBackend.Models.DatabaseModels;
 using System.Linq;
 
-namespace KickerEloBackend.Functions
+namespace KickerEloBackend.Functions.Commands
 {
     public static class EnterGame
     {
@@ -33,12 +33,12 @@ namespace KickerEloBackend.Functions
             // Validate input data
             if (
                 // Check if there are exactly two teams
-                data.Teams.Count() != 2 || 
+                data.Teams.Count() != 2 ||
                 // Check that each team has at least one player
-                data.Teams.Any(team => !team.PlayerIDs.Any()) || 
+                data.Teams.Any(team => !team.PlayerIDs.Any()) ||
                 // Check that no player of team A is also part of team B
-                data.Teams.Any(teamA => teamA.PlayerIDs.Any(id => data.Teams.Where(team => team.TeamNumber != teamA.TeamNumber).Any(teamB => teamB.PlayerIDs.Contains(id)))) 
-                ) 
+                data.Teams.Any(teamA => teamA.PlayerIDs.Any(id => data.Teams.Where(team => team.TeamNumber != teamA.TeamNumber).Any(teamB => teamB.PlayerIDs.Contains(id))))
+                )
             {
                 return new BadRequestObjectResult("The input data was invalid");
             }
@@ -50,8 +50,9 @@ namespace KickerEloBackend.Functions
                 SeasonID = currentSeason.SeasonId,
                 GameID = newGameId,
                 RowKey = newGameId,
-                Date = DateTime.Now
+                Date = DateTime.UtcNow
             };
+            await tableService.GetTableClient(DatabaseTables.GamesTable).AddEntityAsync(newGame);
 
             var result = await EloHelper.CalculateAndUpdateResults(tableService, newGame, data);
 
