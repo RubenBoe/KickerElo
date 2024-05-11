@@ -1,6 +1,6 @@
-import { Button, Stack, Typography } from "@mui/material"
-import { useState } from "react"
-import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom"
+import { BrowserRouter, Route, Routes } from "react-router-dom"
+import { ClientHome } from "src/components/client-home/ClientHome"
+import { ClientSelection } from "src/components/client-selection/ClientSelection"
 
 
 export const AppRoutes = () => {
@@ -9,29 +9,13 @@ export const AppRoutes = () => {
             <Routes>
                 <Route path="/" element={<ClientSelection />}>
                     <Route index element={<ClientHome />} />
+                    <Route path="Ranking">
+                        <Route index element={"Ranking"} />
+                        <Route path=":PlayerID" element={"Player Details"} />
+                    </Route>
+                    <Route path="Games" element={"Games"} />
                 </Route>
             </Routes>
         </BrowserRouter>
-    )
-}
-
-const ClientSelection = () => {
-
-    const [clientSelected, setClientSelected] = useState(false)
-
-    return (
-        clientSelected ? 
-        <Outlet /> 
-        : <Stack>
-
-            <Typography>ClientsSelection</Typography>
-            <Button onClick={() => setClientSelected(true)}>Select Client</Button>
-        </Stack>
-    )
-}
-
-const ClientHome = () => {
-    return (
-        <Typography>Client Home</Typography>
     )
 }
