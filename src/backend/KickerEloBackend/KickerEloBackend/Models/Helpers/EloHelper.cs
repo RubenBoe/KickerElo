@@ -16,9 +16,9 @@ namespace KickerEloBackend.Models.Helpers
     {
         public const int InitialEloNumber = 1200;
         // This constant is used for the calculation of the new elo number
-        private const int kNumber = 20;
+        private const int kNumber = 15;
         // Number used to divide by in the calculation of the expectation value. This is a random number. In the chess system, 400 is chosen
-        private const int divisor = 200;
+        private const int divisor = 400;
 
         public static async Task<GameResults> CalculateAndUpdateResults(TableServiceClient tableService, Game game, EnterGameCommand gameCommand)
         {
