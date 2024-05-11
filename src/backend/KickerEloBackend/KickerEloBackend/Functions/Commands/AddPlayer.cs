@@ -42,7 +42,7 @@ namespace KickerEloBackend.Functions.Commands
 
             var currentSeason = tableService.GetTableClient(DatabaseTables.SeasonsTable).Query<Season>(x => x.EndDate == null && x.ClientID == client.Id).First();
 
-            var newPlayerElo = new PlayerElo(newPlayerId, currentSeason.SeasonId, EloHelper.InitialEloNumber);
+            var newPlayerElo = new PlayerElo(newPlayerId, currentSeason.SeasonID, EloHelper.InitialEloNumber);
 
             await tableService.GetTableClient(DatabaseTables.PlayerEloTable).AddEntityAsync(newPlayerElo);
 

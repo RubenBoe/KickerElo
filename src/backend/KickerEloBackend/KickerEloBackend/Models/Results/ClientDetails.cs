@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace KickerEloBackend.Models.Results
 {
@@ -7,7 +8,7 @@ namespace KickerEloBackend.Models.Results
         public string ClientName { get; set; }
         public DateTime CreationDate { get; set; }
         public int NumberOfPlayers { get; set; }
-        public SeasonResult CurrentSeason { get; set; }
+        public IEnumerable<SeasonResult> Seasons { get; set; }
         public PlayerResult CurrentLeader { get; set; }
     }
 }

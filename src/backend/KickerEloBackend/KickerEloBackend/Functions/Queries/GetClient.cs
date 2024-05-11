@@ -28,9 +28,10 @@ namespace KickerEloBackend.Functions.Queries
             var playersTable = tableService.GetTableClient(DatabaseTables.PlayersTable);
             var numberOfPlayers = playersTable.Query<Player>(x => x.ClientID == client.Id).Count();
 
-            var currentSeason = tableService.GetTableClient(DatabaseTables.SeasonsTable).Query<Season>(x => x.ClientID == client.Id && x.EndDate == null).First();
+            var seasons = tableService.GetTableClient(DatabaseTables.SeasonsTable).Query<Season>(x => x.ClientID == client.Id).OrderByDescending(x => x.StartDate);
+            var currentSeason = seasons.First(x => x.EndDate == null);
 
-            var topEloPlayer = tableService.GetTableClient(DatabaseTables.PlayerEloTable).Query<PlayerElo>(x => x.SeasonID == currentSeason.SeasonId).OrderByDescending(x => x.EloNumber).First();
+            var topEloPlayer = tableService.GetTableClient(DatabaseTables.PlayerEloTable).Query<PlayerElo>(x => x.SeasonID == currentSeason.SeasonID).OrderByDescending(x => x.EloNumber).First();
             var topEloPlayerInfo = playersTable.Query<Player>(x => x.PlayerID == topEloPlayer.PlayerID && x.ClientID == client.Id).First();
 
             var result = new ClientDetails()
@@ -38,7 +39,7 @@ namespace KickerEloBackend.Functions.Queries
                 ClientName = client.ClientName,
                 CreationDate = client.CreationDate,
                 NumberOfPlayers = numberOfPlayers,
-                CurrentSeason = new SeasonResult(currentSeason),
+                Seasons = seasons.Select(season => new SeasonResult(season)),
                 CurrentLeader = new PlayerResult()
                 {
                     PlayerID = topEloPlayer.PlayerID,

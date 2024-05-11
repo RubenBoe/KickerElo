@@ -7,7 +7,7 @@ namespace KickerEloBackend.Models.Results
     {
         public SeasonResult(Season season) 
         {
-            SeasonId = season.SeasonId;
+            SeasonId = season.SeasonID;
             SeasonNumber = season.SeasonNumber;
             StartDate = season.StartDate;
             EndDate = season.EndDate;

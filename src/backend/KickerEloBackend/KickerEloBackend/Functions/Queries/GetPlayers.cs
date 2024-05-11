@@ -27,7 +27,7 @@ namespace KickerEloBackend.Functions.Queries
             var currentSeason = tableService.GetTableClient(DatabaseTables.SeasonsTable).Query<Season>(x => x.ClientID == client.Id && x.EndDate == null).First();
 
             var players = tableService.GetTableClient(DatabaseTables.PlayersTable).Query<Player>(x => x.ClientID == client.Id);
-            var playerElos = tableService.GetTableClient(DatabaseTables.PlayerEloTable).Query<PlayerElo>(x => x.SeasonID == currentSeason.SeasonId);
+            var playerElos = tableService.GetTableClient(DatabaseTables.PlayerEloTable).Query<PlayerElo>(x => x.SeasonID == currentSeason.SeasonID);
 
             var result = players
                 .Select(p =>

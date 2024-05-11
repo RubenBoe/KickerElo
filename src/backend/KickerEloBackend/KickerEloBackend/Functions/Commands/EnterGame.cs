@@ -47,7 +47,7 @@ namespace KickerEloBackend.Functions.Commands
             var newGame = new Game()
             {
                 ClientID = client.Id,
-                SeasonID = currentSeason.SeasonId,
+                SeasonID = currentSeason.SeasonID,
                 GameID = newGameId,
                 RowKey = newGameId,
                 Date = DateTime.UtcNow

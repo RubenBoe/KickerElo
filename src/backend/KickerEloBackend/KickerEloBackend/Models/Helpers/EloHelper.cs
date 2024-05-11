@@ -25,6 +25,7 @@ namespace KickerEloBackend.Models.Helpers
             var result = new GameResult()
             {
                 Date = game.Date,
+                SeasonID = game.SeasonID,
                 GameID = game.GameID,
                 TeamResults = gameCommand.Teams.Select(team => new TeamGameResult()
                 {

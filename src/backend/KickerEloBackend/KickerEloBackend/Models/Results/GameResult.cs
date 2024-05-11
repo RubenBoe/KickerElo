@@ -6,6 +6,7 @@ namespace KickerEloBackend.Models.Results
     internal class GameResult
     {
         public string GameID {  get; set; }
+        public string SeasonID { get; set; }
         public DateTime Date { get; set; }
         public IEnumerable<TeamGameResult> TeamResults { get; set; }
     }

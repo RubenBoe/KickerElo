@@ -45,11 +45,11 @@ namespace KickerEloBackend.Functions.Commands
                 newSeasonNumber = currentSeason.SeasonNumber + 1;
             }
 
-            var newSeasonId = $"{client.Id}_{newSeasonNumber}";
+            var newSeasonId = Guid.NewGuid().ToString();
             var newSeason = new Season()
             {
                 SeasonNumber = newSeasonNumber,
-                SeasonId = newSeasonId,
+                SeasonID = newSeasonId,
                 StartDate = DateTime.UtcNow,
                 ClientID = client.Id,
                 RowKey = newSeasonId
