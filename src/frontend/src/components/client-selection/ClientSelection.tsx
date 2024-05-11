@@ -8,11 +8,11 @@ import { ClientSelector } from './ClientSelector';
 import { ClientContentContainer } from './ClientContentContainer';
 
 export const ClientSelection = () => {
-    const { isLoading, setClientID, client, clientID } =
+    const { isLoading, setClientID, clientID: client, clientID } =
         useContext(ClientContext);
 
     return (
-        <Stack>
+        <Stack overflow={"hidden"} height={"100%"}>
             {isLoading ? (
                 <CircularProgress />
             ) : clientID === undefined || client === undefined ? (

@@ -32,12 +32,12 @@ const PlayerDetails = (props: PlayerDetailsProps) => {
 
     if (playerDetails.isError) return 'Something went wrong';
     return (
-        <Stack gap={1} overflow={"auto"} sx={{maxHeight: "50vh"}}>
+        <Stack gap={1} sx={{maxHeight: "50vh"}} overflow={"hidden"}>
             <Typography variant="h2">Details:</Typography>
             {playerDetails.isLoading ? (
                 <CircularProgress />
             ) : (
-                <Stack gap={1}>
+                <Stack gap={1} overflow={"auto"}>
                     <PlayerChip
                         player={{
                             eloNumber: playerDetails.data!.eloNumber,

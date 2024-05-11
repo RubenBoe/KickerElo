@@ -11,7 +11,7 @@ export const PlayerChip = (props: PlayerChipProps) => {
     const theme = useTheme();
 
     return (
-        <Card>
+        <Card style={{flexShrink: 0}}>
             <CardContent>
                 <Link to={`/Ranking/${props.player.playerID}`} style={{textDecoration: "none"}}>
                     <Typography variant="h2" color={theme.palette.primary.main}>

@@ -1,4 +1,4 @@
-import { UseQueryResult, useQuery } from "@tanstack/react-query";
+import { UseQueryResult, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios"
 import { ClientDetails } from "src/models/ClientDetails"
 import { PlayerDetailsResult } from "src/models/PlayerDetailsResult";
@@ -51,4 +51,16 @@ export const usePlayerDetails = (playerID: string) => {
         queryFn: () => axios.get<PlayerDetailsResult>(`${apiUrl}Player/${playerID}`).then(res => res.data)
     });
     return queryResult;
+}
+
+export const useAddPlayer = () => {
+
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: {clientToken: string, nickname: string, fullName: string}) => axios.post(`${apiUrl}AddPlayer`, {ClientToken: data.clientToken, Nickname: data.nickname, FullName: data.fullName}).then(res => res.data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ["players"]})
+        }
+    });
 }

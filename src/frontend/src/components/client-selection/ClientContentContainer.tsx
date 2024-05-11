@@ -22,7 +22,7 @@ export interface ClientContentContainerProps {
 
 export const ClientContentContainer = (props: ClientContentContainerProps) => {
     return (
-        <Stack gap={1}>
+        <Stack gap={1} height={"100%"} overflow={"hidden"}>
             <AppBar position="static">
                 <Toolbar>
                     <Stack
