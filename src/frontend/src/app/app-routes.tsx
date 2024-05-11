@@ -1,21 +1,34 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom"
-import { ClientHome } from "src/components/client-home/ClientHome"
-import { ClientSelection } from "src/components/client-selection/ClientSelection"
-
+import { useContext } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { ClientContext } from 'src/components/client-context/ClientContextProvider';
+import { ClientHome } from 'src/components/client-home/ClientHome';
+import { ClientSelection } from 'src/components/client-selection/ClientSelection';
+import { Ranking } from 'src/components/ranking/Ranking';
 
 export const AppRoutes = () => {
+    const { clientID } = useContext(ClientContext);
+
     return (
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<ClientSelection />}>
                     <Route index element={<ClientHome />} />
-                    <Route path="Ranking">
-                        <Route index element={"Ranking"} />
-                        <Route path=":PlayerID" element={"Player Details"} />
-                    </Route>
-                    <Route path="Games" element={"Games"} />
+                    {clientID && (
+                        <Route path="Ranking">
+                            <Route
+                                index
+                                element={<Ranking clientID={clientID} />}
+                            />
+                            <Route
+                                path=":PlayerID"
+                                element={'Player Details'}
+                            />
+                        </Route>
+                    )}
+                    <Route path="Games" element={'Games'} />
+                    <Route path="*" element={<Navigate to={'/'} />} />
                 </Route>
             </Routes>
         </BrowserRouter>
-    )
-}
+    );
+};

@@ -1,5 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios"
 import { ClientDetails } from "src/models/ClientDetails"
+import { PlayerResult } from "src/models/PlayerResult";
 
 // const apiUrl = process.env["NX_API_URL"];
 const apiUrl = "http://localhost:7123/api/";
@@ -28,4 +30,11 @@ export function handleDates(body: any) {
 
 export const getClientDetails = async (clientToken: string): Promise<ClientDetails> => {
     return axios.get<ClientDetails>(`${apiUrl}Client/${clientToken}`).then(res => res.data)
+}
+
+export const usePlayers = (clientToken: string) => {
+    return useQuery({
+        queryKey: ["players"],
+        queryFn: () => axios.get<PlayerResult[]>(`${apiUrl}Players/${clientToken}`).then(res => res.data)
+    });
 }

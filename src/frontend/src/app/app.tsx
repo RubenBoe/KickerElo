@@ -1,13 +1,17 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ClientContextProvider } from 'src/components/client-context/ClientContextProvider';
 import { AppRoutes } from './app-routes';
-import styles from './app.module.less';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 export function App() {
+    const queryClient = new QueryClient();
+
     return (
-        <ClientContextProvider>
-            <AppRoutes />
-        </ClientContextProvider>
+        <QueryClientProvider client={queryClient}>
+            <ClientContextProvider>
+                <AppRoutes />
+            </ClientContextProvider>
+        </QueryClientProvider>
     );
 }
 
