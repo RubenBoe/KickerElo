@@ -43,6 +43,15 @@ export const theme = createTheme({
                     style: {
                         fontSize: "1rem"
                     }
+                },
+                {
+                    props: {
+                        variant: "body2"
+                    },
+                    style: {
+                        fontSize: "1rem",
+                        fontWeight: 600
+                    }
                 }
             ]
         }

@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import axios from "axios"
 import { ClientDetails } from "src/models/ClientDetails"
+import { PlayerDetailsResult } from "src/models/PlayerDetailsResult";
 import { PlayerResult } from "src/models/PlayerResult";
 
 // const apiUrl = process.env["NX_API_URL"];
@@ -32,9 +33,22 @@ export const getClientDetails = async (clientToken: string): Promise<ClientDetai
     return axios.get<ClientDetails>(`${apiUrl}Client/${clientToken}`).then(res => res.data)
 }
 
-export const usePlayers = (clientToken: string) => {
-    return useQuery({
+const getPlayers = (clientToken: string) => {
+    return axios.get<PlayerResult[]>(`${apiUrl}Players/${clientToken}`).then(res => res.data)
+}
+
+export const usePlayers = (clientToken: string): UseQueryResult<PlayerResult[], Error> => {
+    const queryResult = useQuery({
         queryKey: ["players"],
-        queryFn: () => axios.get<PlayerResult[]>(`${apiUrl}Players/${clientToken}`).then(res => res.data)
+        queryFn: () => getPlayers(clientToken),
     });
+    return queryResult;
+}
+
+export const usePlayerDetails = (playerID: string) => {
+    const queryResult = useQuery({
+        queryKey: ["players", playerID],
+        queryFn: () => axios.get<PlayerDetailsResult>(`${apiUrl}Player/${playerID}`).then(res => res.data)
+    });
+    return queryResult;
 }
