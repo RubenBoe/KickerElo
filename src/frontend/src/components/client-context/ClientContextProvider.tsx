@@ -18,7 +18,7 @@ export interface ClientContextType {
 
 export const ClientContext = createContext<ClientContextType>({
     setClientID: () => undefined,
-    isLoading: true
+    isLoading: true,
 });
 
 export interface ClientContextProviderProps {}
@@ -37,11 +37,17 @@ export const ClientContextProvider = (
             setIsLoading(true);
             if (clientID !== undefined) {
                 window.localStorage.setItem(clientIdStorageKey, clientID);
-                getClientDetails().then((res) => {
-                    setClient(res);
-                    setClientID(clientID);
-                    setIsLoading(false);
-                });
+                getClientDetails(clientID)
+                    .then((res) => {
+                        setClient(res);
+                        setClientID(clientID);
+                        setIsLoading(false);
+                    })
+                    .catch(() => {
+                        setClient(undefined);
+                        setClientID(clientID);
+                        setIsLoading(false);
+                    });
             } else {
                 window.localStorage.removeItem(clientIdStorageKey);
                 setClient(undefined);
@@ -50,32 +56,36 @@ export const ClientContextProvider = (
             }
         }, []);
 
-    useEffect(
-        () => {
-            const clientIdFromStorage = window.localStorage.getItem(clientIdStorageKey);
-            if(clientIdFromStorage) {
-                getClientDetails().then(
-                    (res) => {
-                        setClient(res);
-                        setClientID(clientIdFromStorage);
-                        setIsLoading(false);
-                    }
-                )
-            } else {
-                setClient(undefined);
-                setClientID(undefined);
+    useEffect(() => {
+        const clientIdFromStorage =
+            window.localStorage.getItem(clientIdStorageKey);
+        if (clientIdFromStorage) {
+            getClientDetails(clientIdFromStorage)
+            .then((res) => {
+                setClient(res);
+                setClientID(clientIdFromStorage);
                 setIsLoading(false);
-            }
-        }, 
-        []
-    )
+            })
+            .catch(
+                () => {
+                    setClient(undefined);
+                    setClientID(undefined);
+                    setIsLoading(false);
+                }
+            )
+        } else {
+            setClient(undefined);
+            setClientID(undefined);
+            setIsLoading(false);
+        }
+    }, []);
 
     const contextValue: ClientContextType = useMemo(() => {
         return {
             client,
             clientID,
             setClientID: handleSetClientID,
-            isLoading
+            isLoading,
         };
     }, [client, clientID, handleSetClientID, isLoading]);
 

@@ -38,7 +38,7 @@ export const ClientSelection = () => {
                 // Select a client
                 <ClientSelector setClientID={setClientID} />
             ) : (
-                <Stack>
+                <Stack gap={1}>
                     <AppBar position="static">
                         <Toolbar>
                             <Stack
@@ -55,6 +55,7 @@ export const ClientSelection = () => {
                                                 textDecoration: 'none',
                                                 color: 'inherit',
                                             })}
+                                            key={link.to}
                                         >
                                             {({ isActive }) => (
                                                 <Button color="inherit" variant={isActive ? 'outlined' : "text"}>
