@@ -52,6 +52,15 @@ export const theme = createTheme({
                         fontSize: "1rem",
                         fontWeight: 600
                     }
+                },
+                {
+                    props: {
+                        variant: "subtitle2",
+                        component: "p"
+                    },
+                    style: {
+                        fontSize: "0.75rem",
+                    }
                 }
             ]
         }
