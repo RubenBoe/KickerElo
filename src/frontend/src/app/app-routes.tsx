@@ -22,7 +22,7 @@ export const AppRoutes = () => {
                             />
                         </Route>
                     )}
-                    <Route path="Games" element={'Games'} />
+                    <Route path="Games" element={'Game History coming soon...'} />
                     <Route path="*" element={<Navigate to={'/'} />} />
                 </Route>
             </Routes>

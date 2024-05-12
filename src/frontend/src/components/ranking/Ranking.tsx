@@ -1,23 +1,22 @@
 import {
-    CircularProgress,
     Drawer,
     IconButton,
     Stack,
     Typography,
 } from '@mui/material';
-import { usePlayers } from 'src/service/backend-service';
 import { PlayerChip } from '../ui-elements/PlayerChip';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { AddPlayerDialog } from '../add-player/AddPlayerDialog';
+import { ClientContext } from '../client-context/ClientContextProvider';
 
 export interface RankingProps {
     clientID: string;
 }
 
 export const Ranking = (props: RankingProps) => {
-    const players = usePlayers(props.clientID);
+    const { players } = useContext(ClientContext);
 
     const [addDialogOpen, setAddDialogOpen] = useState(false);
 
@@ -26,7 +25,6 @@ export const Ranking = (props: RankingProps) => {
     const param = useParams();
     const playerID = param['PlayerID'];
 
-    if (players.isError) return 'Something went wrong';
     return (
         <Stack gap={1} overflow={'hidden'}>
             <Stack alignItems={'center'} gap={1} direction={'row'}>
@@ -35,11 +33,9 @@ export const Ranking = (props: RankingProps) => {
                     <AddIcon />
                 </IconButton>
             </Stack>
-            {players.isLoading ? (
-                <CircularProgress />
-            ) : (
+            {players && (
                 <Stack overflow={'auto'}>
-                    {players.data!.map((player) => (
+                    {players.map((player) => (
                         <PlayerChip player={player} key={player.playerID} />
                     ))}
                     <Drawer
@@ -53,7 +49,7 @@ export const Ranking = (props: RankingProps) => {
                             },
                         }}
                     >
-                        <Outlet context={[players.data]} />
+                        <Outlet context={[players]} />
                     </Drawer>
                 </Stack>
             )}

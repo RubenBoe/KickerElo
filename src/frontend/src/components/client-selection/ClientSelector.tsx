@@ -10,7 +10,7 @@ export const ClientSelector = (props: ClientSelectorProps) => {
     const [value, setValue] = useState('');
 
     return (
-        <Stack gap={1}>
+        <Stack gap={1} sx={{padding: "1rem", paddingTop: "2rem"}}>
             <TextField
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
