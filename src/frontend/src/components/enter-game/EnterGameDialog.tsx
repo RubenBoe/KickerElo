@@ -5,13 +5,17 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
+    IconButton,
     Stack,
+    Typography,
 } from '@mui/material';
 import { useContext, useState } from 'react';
 import { TeamResultCommand } from 'src/models/TeamResultCommand';
 import { useEnterGame } from 'src/service/backend-service';
 import { EnterTeamControl } from './EnterTeamControl';
 import { ClientContext } from '../client-context/ClientContextProvider';
+import { Add } from '@mui/icons-material';
+import { AddPlayerDialog } from '../add-player/AddPlayerDialog';
 
 export interface EnterGameDialogProps {
     open: boolean;
@@ -20,7 +24,6 @@ export interface EnterGameDialogProps {
 
 export const EnterGameDialog = (props: EnterGameDialogProps) => {
     const { clientID } = useContext(ClientContext);
-
     const gameEnterer = useEnterGame();
 
     const [team1, setTeam1] = useState<TeamResultCommand>({
@@ -34,6 +37,8 @@ export const EnterGameDialog = (props: EnterGameDialogProps) => {
         TeamNumber: 2,
     });
 
+    const [newPlayerDialogOpen, setNewPlayerDialogOpen] = useState(false);
+
     const isValid =
         team1.PlayerIDs.length === team2.PlayerIDs.length && //Teams of different lengths aren't balanced yet
         team1.PlayerIDs.length > 0 &&
@@ -42,7 +47,19 @@ export const EnterGameDialog = (props: EnterGameDialogProps) => {
 
     return (
         <Dialog open={props.open} onClose={props.onClose} fullWidth>
-            <DialogTitle>Spiel erfassen</DialogTitle>
+            <DialogTitle>
+                <Stack
+                    direction={'row'}
+                    justifyContent={'space-between'}
+                    alignItems={'center'}
+                >
+                    Spiel erfassen
+                    <Button onClick={() => setNewPlayerDialogOpen(true)} >
+                        <Add />
+                        Neuer Spieler
+                    </Button>
+                </Stack>
+            </DialogTitle>
             <DialogContent>
                 <Stack
                     direction={'row'}
@@ -63,6 +80,7 @@ export const EnterGameDialog = (props: EnterGameDialogProps) => {
                         isWinning={team2.Points > team1.Points}
                     />
                 </Stack>
+                <AddPlayerDialog open={newPlayerDialogOpen} onClose={() => setNewPlayerDialogOpen(false)} />
             </DialogContent>
             <DialogActions>
                 {gameEnterer.isPending ? (
@@ -73,13 +91,12 @@ export const EnterGameDialog = (props: EnterGameDialogProps) => {
                         disabled={!isValid}
                         onClick={() => {
                             if (clientID) {
-                                gameEnterer.mutateAsync({
-                                    ClientToken: clientID,
-                                    Teams: [team1, team2],
-                                })
-                                .then(
-                                    props.onClose
-                                )
+                                gameEnterer
+                                    .mutateAsync({
+                                        ClientToken: clientID,
+                                        Teams: [team1, team2],
+                                    })
+                                    .then(props.onClose);
                             }
                         }}
                     >

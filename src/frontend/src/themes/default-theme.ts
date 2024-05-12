@@ -56,7 +56,7 @@ export const theme = createTheme({
                 {
                     props: {
                         variant: "subtitle2",
-                        component: "p"
+                        component: "p",
                     },
                     style: {
                         fontSize: "0.75rem",
