@@ -17,7 +17,7 @@ export const GameChip = ({ game, players, currentPlayer }: GameChipProps) => {
     return (
         <Card>
             <CardContent>
-                <Stack direction="row" justifyContent={'space-between'}>
+                <Stack direction="row" justifyContent={'space-between'} alignItems={"center"}>
                     <Team
                         team={team1}
                         players={players}
@@ -46,7 +46,7 @@ const Team = ({ team, players, currentPlayer }: TeamProps) => {
     const isWinner = team.playerResults[0].eloGain > 0;
 
     return (
-        <Stack>
+        <Stack alignItems={"center"} flexGrow={1}>
             <Stack>
                 {team.playerResults.map((player) => (
                     <Typography
@@ -61,6 +61,8 @@ const Team = ({ team, players, currentPlayer }: TeamProps) => {
                             players.find((p) => p.playerID === player.playerID)!
                                 .nickname
                         }
+                        &nbsp;
+                        ({player.eloGain > 0 && "+"}{player.eloGain})
                     </Typography>
                 ))}
             </Stack>
