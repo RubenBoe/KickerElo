@@ -9,6 +9,7 @@ import { ClientDetails } from 'src/models/ClientDetails';
 import { GameResult } from 'src/models/GameResult';
 import { PlayerDetailsResult } from 'src/models/PlayerDetailsResult';
 import { PlayerResult } from 'src/models/PlayerResult';
+import { TeamResultCommand } from 'src/models/TeamResultCommand';
 
 // const apiUrl = process.env["NX_API_URL"];
 const apiUrl = 'http://localhost:7123/api/';
@@ -106,11 +107,7 @@ export const useEnterGame = () => {
     return useMutation({
         mutationFn: (data: {
             ClientToken: string;
-            Teams: {
-                PlayerIDs: string[],
-                TeamNumber: number,
-                Points: number
-            }[]
+            Teams: TeamResultCommand[]
         }) => {
             return axios
                 .post<GameResult>(`${apiUrl}EnterGame`, {

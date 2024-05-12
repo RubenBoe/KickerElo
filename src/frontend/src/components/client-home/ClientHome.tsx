@@ -1,10 +1,13 @@
 import { Button, Stack, Typography } from '@mui/material';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { ClientContext } from '../client-context/ClientContextProvider';
 import { PlayerChip } from '../ui-elements/PlayerChip';
+import { EnterGameDialog } from '../enter-game/EnterGameDialog';
 
 export const ClientHome = () => {
     const { client } = useContext(ClientContext);
+
+    const [enterGameDialogOpen, setEnterGameDialogOpen] = useState(false);
 
     if (!client) throw new Error('Something went wrong.');
     return (
@@ -32,7 +35,11 @@ export const ClientHome = () => {
             </Stack>
             <Typography variant="body1">Erste*r der Rangliste:</Typography>
             <PlayerChip player={client.currentLeader} />
-            <Button variant='contained' >Spiel erfassen</Button>
+            <Button variant='contained' onClick={() => setEnterGameDialogOpen(true)} >Spiel erfassen</Button>
+            <EnterGameDialog 
+                open={enterGameDialogOpen}
+                onClose={() => setEnterGameDialogOpen(false)}
+            />
         </Stack>
     );
 };
