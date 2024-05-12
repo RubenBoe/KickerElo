@@ -1,5 +1,6 @@
 import { AppBar, Button, Stack, Toolbar } from '@mui/material';
 import { NavLink, Outlet } from 'react-router-dom';
+import { PageFooter } from '../ui-elements/PageFooter';
 
 const links = [
     {
@@ -64,8 +65,9 @@ export const ClientContentContainer = (props: ClientContentContainerProps) => {
                     </Stack>
                 </Toolbar>
             </AppBar>
-            <Stack padding={"0.5rem"} overflow={"hidden"}>
+            <Stack padding={"0.5rem"} overflow={"hidden"} justifyContent={"space-between"} flexGrow={1}>
                 <Outlet />
+                <PageFooter />
             </Stack>
         </Stack>
     );
