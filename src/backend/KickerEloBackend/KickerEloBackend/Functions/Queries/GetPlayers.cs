@@ -12,6 +12,7 @@ using KickerEloBackend.Models.DatabaseModels;
 using KickerEloBackend.Models;
 using System.Linq;
 using KickerEloBackend.Models.Results;
+using System.Web.Http;
 
 namespace KickerEloBackend.Functions.Queries
 {
@@ -22,30 +23,42 @@ namespace KickerEloBackend.Functions.Queries
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Players/{ClientToken}")] HttpRequest req, string ClientToken,
             ILogger log)
         {
-            var tableService = TablesHelper.GetTableServiceClient();
-            var client = ClientHelper.GetClient(ClientToken, tableService);
-            var seasons = tableService.GetTableClient(DatabaseTables.SeasonsTable).Query<Season>(x => x.ClientID == client.Id);
-            var currentSeason = seasons.First(s => s.EndDate == null);
+            try
+            {
+                var tableService = TablesHelper.GetTableServiceClient();
+                var client = ClientHelper.GetClient(ClientToken, tableService);
+                var seasons = tableService.GetTableClient(DatabaseTables.SeasonsTable).Query<Season>(x => x.ClientID == client.Id);
+                var currentSeason = seasons.First(s => s.EndDate == null);
 
-            var players = tableService.GetTableClient(DatabaseTables.PlayersTable).Query<Player>(x => x.ClientID == client.Id);
-            var playerElos = tableService.GetTableClient(DatabaseTables.PlayerEloTable).Query<PlayerElo>(x => x.SeasonID == currentSeason.SeasonID);
+                log.LogInformation(currentSeason.SeasonID);
 
-            var result = players
-                .Select(p =>
-                {
-                    var correspondingPlayerElo = playerElos.First(x => x.PlayerID == p.PlayerID);
-                    return new PlayerResult()
+                var players = tableService.GetTableClient(DatabaseTables.PlayersTable).Query<Player>(x => x.ClientID == client.Id).ToList();
+                var playerElos = tableService.GetTableClient(DatabaseTables.PlayerEloTable).Query<PlayerElo>(x => x.SeasonID == currentSeason.SeasonID).ToList();
+
+                log.LogInformation("Found players", players, playerElos);
+
+                var result = players
+                    .Select(p =>
                     {
-                        Nickname = p.Nickname,
-                        PlayerID = p.PlayerID,
-                        EloNumber = correspondingPlayerElo.EloNumber,
-                        LastUpdated = correspondingPlayerElo.LastUpdated,
-                    };
-                })
-                .OrderByDescending(x => x.EloNumber);
+                        var correspondingPlayerElo = playerElos.First(x => x.PlayerID == p.PlayerID);
+                        return new PlayerResult()
+                        {
+                            Nickname = p.Nickname,
+                            PlayerID = p.PlayerID,
+                            EloNumber = correspondingPlayerElo.EloNumber,
+                            LastUpdated = correspondingPlayerElo.LastUpdated,
+                        };
+                    })
+                    .OrderByDescending(x => x.EloNumber);
 
+                log.LogInformation("created result", result);
 
-            return new OkObjectResult(result);
+                return new OkObjectResult(result);
+            } catch (Exception ex)
+            {
+                log.LogError(ex, ex.Message);
+                return new InternalServerErrorResult();
+            }
         }
     }
 }
