@@ -28,7 +28,8 @@ namespace KickerEloBackend.Functions.Commands
 
             var tableService = TablesHelper.GetTableServiceClient();
             var client = ClientHelper.GetClient(data.ClientToken, tableService);
-            var currentSeason = tableService.GetTableClient(DatabaseTables.SeasonsTable).Query<Season>(s => s.EndDate == null && s.ClientID == client.Id).First();
+            var seasons = tableService.GetTableClient(DatabaseTables.SeasonsTable).Query<Season>(x => x.ClientID == client.Id);
+            var currentSeason = seasons.First(s => s.EndDate == null);
 
             // Validate input data
             if (

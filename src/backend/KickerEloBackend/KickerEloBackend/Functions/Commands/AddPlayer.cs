@@ -12,6 +12,7 @@ using KickerEloBackend.Models.Helpers;
 using KickerEloBackend.Models.DatabaseModels;
 using KickerEloBackend.Models;
 using System.Linq;
+using System.Web.Http;
 
 namespace KickerEloBackend.Functions.Commands
 {
@@ -22,31 +23,39 @@ namespace KickerEloBackend.Functions.Commands
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            var data = JsonSerializer.Deserialize<AddPlayerCommand>(requestBody);
-
-            var tableService = TablesHelper.GetTableServiceClient();
-            var client = ClientHelper.GetClient(data.ClientToken, tableService);
-
-            var newPlayerId = Guid.NewGuid().ToString();
-            var newPlayer = new Player()
+            try
             {
-                ClientID = client.Id,
-                Nickname = data.Nickname,
-                FullName = data.FullName,
-                PlayerID = newPlayerId,
-                RowKey = newPlayerId
-            };
+                string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+                var data = JsonSerializer.Deserialize<AddPlayerCommand>(requestBody);
 
-            await tableService.GetTableClient(DatabaseTables.PlayersTable).AddEntityAsync(newPlayer);
+                var tableService = TablesHelper.GetTableServiceClient();
+                var client = ClientHelper.GetClient(data.ClientToken, tableService);
 
-            var currentSeason = tableService.GetTableClient(DatabaseTables.SeasonsTable).Query<Season>(x => x.EndDate == null && x.ClientID == client.Id).First();
+                var newPlayerId = Guid.NewGuid().ToString();
+                var newPlayer = new Player()
+                {
+                    ClientID = client.Id,
+                    Nickname = data.Nickname,
+                    FullName = data.FullName,
+                    PlayerID = newPlayerId,
+                    RowKey = newPlayerId
+                };
 
-            var newPlayerElo = new PlayerElo(newPlayerId, currentSeason.SeasonID, EloHelper.InitialEloNumber);
+                await tableService.GetTableClient(DatabaseTables.PlayersTable).AddEntityAsync(newPlayer);
 
-            await tableService.GetTableClient(DatabaseTables.PlayerEloTable).AddEntityAsync(newPlayerElo);
+                var seasons = tableService.GetTableClient(DatabaseTables.SeasonsTable).Query<Season>(x => x.ClientID == client.Id);
+                var currentSeason = seasons.First(s => s.EndDate == null);
 
-            return new OkObjectResult(newPlayer);
+                var newPlayerElo = new PlayerElo(newPlayerId, currentSeason.SeasonID, EloHelper.InitialEloNumber);
+
+                await tableService.GetTableClient(DatabaseTables.PlayerEloTable).AddEntityAsync(newPlayerElo);
+
+                return new OkObjectResult(newPlayer);
+            } catch (Exception e)
+            {
+                log.LogError(e.Message, e);
+                return new InternalServerErrorResult();
+            }
         }
     }
 }
