@@ -19,7 +19,7 @@ namespace KickerEloBackend.Functions.Queries
     {
         [FunctionName("GetClient")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "Client/{ClientToken}")] HttpRequest req, string ClientToken,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Client/{ClientToken}")] HttpRequest req, string ClientToken,
             ILogger log)
         {
             var tableService = TablesHelper.GetTableServiceClient();

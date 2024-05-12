@@ -19,7 +19,7 @@ namespace KickerEloBackend.Functions.Commands
     {
         [FunctionName("EnterGame")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
             ILogger log)
         {
 
