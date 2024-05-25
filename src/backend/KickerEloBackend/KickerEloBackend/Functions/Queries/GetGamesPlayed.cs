@@ -30,9 +30,10 @@ namespace KickerEloBackend.Functions.Queries
             var games = tableService.GetTableClient(DatabaseTables.GamesTable).Query<Game>(g => g.SeasonID == season.SeasonID);
             var playerGames = tableService.GetTableClient(DatabaseTables.PlayerGameTable).Query<PlayerGame>(x => x.ClientID == season.ClientID).Where(x => games.Select(x => x.GameID).Contains(x.GameID));
 
+            var playerGamesLookup = playerGames.ToLookup(x => x.GameID);
             var gamesPlayed = games.Select(g =>
                 {
-                    var correspondingPlayerGames = playerGames.Where(x => x.GameID == g.GameID);
+                    var correspondingPlayerGames = playerGamesLookup[g.GameID];
                     var teams = correspondingPlayerGames.GroupBy(x => x.Team).Select(grouping =>
                     {
                         return new TeamGameResult()
