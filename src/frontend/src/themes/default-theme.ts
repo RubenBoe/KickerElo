@@ -63,10 +63,46 @@ export const theme = createTheme({
                     }
                 }
             ]
+        },
+        MuiSvgIcon: {
+            styleOverrides: {
+
+            }
         }
     },
     palette: {
       primary: indigo,
       secondary: cyan,
+      gold: {
+          main: "#FFD700"
+      },
+      silver: {
+          main: "#C0C0C0"
+      },
+      bronze: {
+          main: "#CD7F32"
+      }
     },
 })
+
+declare module '@mui/material/styles' {
+    interface Palette {
+      gold: Palette['primary'];
+      silver: Palette['primary'];
+      bronze: Palette['primary'];
+    }
+  
+    interface PaletteOptions {
+        gold?: PaletteOptions['primary'];
+        silver?: PaletteOptions['primary'];
+        bronze?: PaletteOptions['primary'];
+    }
+  }
+
+declare module "@mui/material/SvgIcon" {
+    interface SvgIconPropsColorOverrides {
+      "gold": true;
+      "silver": true;
+      "bronze": true;
+    }
+  }

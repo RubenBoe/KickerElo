@@ -34,7 +34,7 @@ export const ClientHome = () => {
                 </Typography>
             </Stack>
             <Typography variant="body1">Erste*r der Rangliste:</Typography>
-            <PlayerChip player={client.currentLeader} />
+            <PlayerChip player={client.currentLeader} ranking={1} />
             <Button variant='contained' onClick={() => setEnterGameDialogOpen(true)} >Spiel erfassen</Button>
             <EnterGameDialog 
                 open={enterGameDialogOpen}

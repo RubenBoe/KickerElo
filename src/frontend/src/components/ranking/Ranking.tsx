@@ -35,8 +35,8 @@ export const Ranking = (props: RankingProps) => {
             </Stack>
             {players && (
                 <Stack overflow={'auto'}>
-                    {players.map((player) => (
-                        <PlayerChip player={player} key={player.playerID} />
+                    {players.map((player, index) => (
+                        <PlayerChip ranking={index + 1} player={player} key={player.playerID} />
                     ))}
                     <Drawer
                         open={playerID !== undefined}

@@ -8,17 +8,21 @@ import { useContext } from 'react';
 import { ClientContext } from '../client-context/ClientContextProvider';
 
 export const PlayerDetailsContainer = () => {
+    const {players} = useContext(ClientContext);
     const params = useParams();
     const playerID = params['PlayerID'];
+
+    const rank = players.findIndex(p => p.playerID === playerID) + 1;
 
     if (!playerID) {
         return <Navigate to="/Ranking" />;
     }
-    return <PlayerDetails playerID={playerID} />;
+    return <PlayerDetails rank={rank} playerID={playerID} />;
 };
 
 interface PlayerDetailsProps {
     playerID: string;
+    rank: number;
 }
 
 const PlayerDetails = (props: PlayerDetailsProps) => {
@@ -27,8 +31,6 @@ const PlayerDetails = (props: PlayerDetailsProps) => {
 
     const client = useContext(ClientContext);
     const currentSeason = client.client!.seasons.find(s => s.endDate === null)!;
-
-    console.log(players);
 
     if (playerDetails.isError) return 'Something went wrong';
     return (
@@ -47,6 +49,7 @@ const PlayerDetails = (props: PlayerDetailsProps) => {
                             })`,
                             playerID: playerDetails.data!.playerID,
                         }}
+                        ranking={props.rank}
                     />
                     <Divider />
                     <Stack>
