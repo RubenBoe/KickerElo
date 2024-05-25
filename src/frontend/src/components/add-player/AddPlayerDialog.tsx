@@ -24,6 +24,13 @@ export const AddPlayerDialog = (props: AddPlayerDialogProps) => {
 
     const { clientID } = useContext(ClientContext);
 
+    const handleClose = () => {
+        setNickname("");
+        setFullName("");
+
+        props.onClose();
+    }
+
     if (!clientID) return 'Something went wrong';
     return (
         <Dialog open={props.open} onClose={props.onClose}>
@@ -52,13 +59,13 @@ export const AddPlayerDialog = (props: AddPlayerDialogProps) => {
                                 fullName: fullName,
                                 nickname: nickname,
                             })
-                            .then(props.onClose)
+                            .then(handleClose)
                     }
                     variant="contained"
                 >
                     Hinzufügen
                 </Button>
-                <Button variant="outlined" onClick={props.onClose}>
+                <Button variant="outlined" onClick={handleClose}>
                     Abbrechen
                 </Button>
             </DialogActions>

@@ -5,7 +5,7 @@ import {
     Select,
     Stack,
 } from '@mui/material';
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import { TeamResultCommand } from 'src/models/TeamResultCommand';
 import { ClientContext } from '../client-context/ClientContextProvider';
 import { EnterPointsControl } from './EnterPointsControl';
@@ -19,6 +19,13 @@ export interface EnterTeamControlProps {
 
 export const EnterTeamControl = ({ team, onChange, opponentTeamPlayerIDs, isWinning }: EnterTeamControlProps) => {
     const { players } = useContext(ClientContext);
+    
+    const orderedPlayers = useMemo(
+        () => {
+            return [...players].sort((a, b) => a.nickname.localeCompare(b.nickname))
+        },
+        [players]
+    )
 
     const addNewPlayer = (playerID: string) => {
         onChange({ ...team, PlayerIDs: [...team.PlayerIDs, playerID] });
@@ -43,7 +50,7 @@ export const EnterTeamControl = ({ team, onChange, opponentTeamPlayerIDs, isWinn
                             <MenuItem value={''} sx={{ fontStyle: 'italic' }}>
                                 Entfernen
                             </MenuItem>
-                            {players
+                            {orderedPlayers
                                 .filter(
                                     // Only show those that are not already selected for the team
                                     (p) =>
@@ -69,7 +76,7 @@ export const EnterTeamControl = ({ team, onChange, opponentTeamPlayerIDs, isWinn
                     onChange={(e) => addNewPlayer(e.target.value as string)}
                     value={""}
                 >
-                    {players
+                    {orderedPlayers
                         .filter(
                             // Only show those that are not already selected for the team
                             (p) => !team.PlayerIDs.includes(p.playerID) && !opponentTeamPlayerIDs.includes(p.playerID)

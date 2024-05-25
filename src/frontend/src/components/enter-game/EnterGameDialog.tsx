@@ -5,9 +5,7 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    IconButton,
     Stack,
-    Typography,
 } from '@mui/material';
 import { useContext, useState } from 'react';
 import { TeamResultCommand } from 'src/models/TeamResultCommand';
@@ -39,6 +37,22 @@ export const EnterGameDialog = (props: EnterGameDialogProps) => {
 
     const [newPlayerDialogOpen, setNewPlayerDialogOpen] = useState(false);
 
+    const handleClose = () => {
+        // Reset data
+        setTeam1({
+            PlayerIDs: [],
+            Points: 0,
+            TeamNumber: 1,
+        });
+        setTeam2({
+            PlayerIDs: [],
+            Points: 0,
+            TeamNumber: 2,
+        })
+
+        props.onClose();
+    }
+
     const isValid =
         team1.PlayerIDs.length === team2.PlayerIDs.length && //Teams of different lengths aren't balanced yet
         team1.PlayerIDs.length > 0 &&
@@ -46,7 +60,7 @@ export const EnterGameDialog = (props: EnterGameDialogProps) => {
         team1.Points !== team2.Points; // Ties aren't supported yet
 
     return (
-        <Dialog open={props.open} onClose={props.onClose} fullWidth>
+        <Dialog open={props.open} onClose={handleClose} fullWidth>
             <DialogTitle>
                 <Stack
                     direction={'row'}
@@ -96,14 +110,14 @@ export const EnterGameDialog = (props: EnterGameDialogProps) => {
                                         ClientToken: clientID,
                                         Teams: [team1, team2],
                                     })
-                                    .then(props.onClose);
+                                    .then(handleClose);
                             }
                         }}
                     >
                         Speichern
                     </Button>
                 )}
-                <Button variant="outlined" onClick={props.onClose}>
+                <Button variant="outlined" onClick={handleClose}>
                     Abbrechen
                 </Button>
             </DialogActions>
