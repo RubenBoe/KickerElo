@@ -29,7 +29,7 @@ export const Games = ({ client }: GamesProps) => {
             {games ? (
                 <Stack overflow={'auto'} gap={1}>
                     {games.map((game) => (
-                        <GameChip game={game} players={players} />
+                        <GameChip key={game.gameID} game={game} players={players} />
                     ))}
                 </Stack>
             ) : (
