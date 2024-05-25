@@ -6,13 +6,11 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using KickerEloBackend.Models.Helpers;
 using KickerEloBackend.Models;
 using KickerEloBackend.Models.DatabaseModels;
 using System.Linq;
 using KickerEloBackend.Models.Results;
-using Azure;
 
 namespace KickerEloBackend.Functions.Queries
 {
@@ -26,7 +24,10 @@ namespace KickerEloBackend.Functions.Queries
             var tableService = TablesHelper.GetTableServiceClient();
             var player = tableService.GetTableClient(DatabaseTables.PlayersTable).Query<Player>(x => x.PlayerID == PlayerID).First();
 
-            var playerElo = tableService.GetTableClient(DatabaseTables.PlayerEloTable).Query<PlayerElo>(x => x.PlayerID == PlayerID).First();
+            var seasons = tableService.GetTableClient(DatabaseTables.SeasonsTable).Query<Season>(x => x.ClientID == player.ClientID);
+            var currentSeason = seasons.First(s => s.EndDate == null);
+
+            var playerElo = tableService.GetTableClient(DatabaseTables.PlayerEloTable).Query<PlayerElo>(x => x.PlayerID == PlayerID && x.SeasonID == currentSeason.SeasonID).First();
 
             var playerGameTable = tableService.GetTableClient(DatabaseTables.PlayerGameTable);
 
@@ -69,6 +70,8 @@ namespace KickerEloBackend.Functions.Queries
                     };
                 }).OrderByDescending(x => x.Date)
             };
+
+            log.LogInformation($"Calculated result object");
 
             return new OkObjectResult(result);
         }
