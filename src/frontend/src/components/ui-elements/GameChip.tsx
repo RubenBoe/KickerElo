@@ -25,7 +25,7 @@ export const GameChip = ({
             <CardContent>
                 <Stack alignItems={'center'}>
                     {!hideDate && (
-                        <Typography variant="body1">
+                        <Typography variant="body1" color={(theme) => theme.palette.grey[500]}>
                             {game.date.toLocaleDateString('de', {
                                 hour: 'numeric',
                                 minute: '2-digit',
