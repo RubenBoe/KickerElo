@@ -45,22 +45,22 @@ const getClientDetails = async (
         .then((res) => res.data);
 };
 
-export const useClientDetails = (clientToken: string) => {
-    return useQuery({
-        queryKey: ["client", clientToken],
-        queryFn: () => getClientDetails(clientToken)
-    })
-}
-
 const getPlayers = (clientToken: string) => {
     return axios
         .get<PlayerResult[]>(`${apiUrl}Players/${clientToken}`)
         .then((res) => res.data);
 };
 
-export const usePlayers = (
-    clientToken: string
-) => {
+// Queries -----------------------------------------------------------------------------
+
+export const useClientDetails = (clientToken: string) => {
+    return useQuery({
+        queryKey: ['client', clientToken],
+        queryFn: () => getClientDetails(clientToken),
+    });
+};
+
+export const usePlayers = (clientToken: string) => {
     const queryResult = useQuery({
         queryKey: ['players'],
         queryFn: () => getPlayers(clientToken),
@@ -79,6 +79,18 @@ export const usePlayerDetails = (playerID: string) => {
     return queryResult;
 };
 
+export const useGetGames = (seasonID: string) => {
+    return useQuery({
+        queryKey: ['games'],
+        queryFn: () =>
+            axios
+                .get<GameResult[]>(`${apiUrl}Games/${seasonID}`)
+                .then((res) => res.data),
+    });
+};
+
+// Mutations ------------------------------------------------------------------
+
 export const useAddPlayer = () => {
     const queryClient = useQueryClient();
 
@@ -95,8 +107,8 @@ export const useAddPlayer = () => {
                     FullName: data.fullName,
                 })
                 .then((res) => res.data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['players'] });
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['players'] });
         },
     });
 };
@@ -107,18 +119,21 @@ export const useEnterGame = () => {
     return useMutation({
         mutationFn: (data: {
             ClientToken: string;
-            Teams: TeamResultCommand[]
+            Teams: TeamResultCommand[];
         }) => {
             return axios
                 .post<GameResult>(`${apiUrl}EnterGame`, {
                     ClientToken: data.ClientToken,
-                    Teams: data.Teams
+                    Teams: data.Teams,
                 })
                 .then((res) => res.data);
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['players'] });
-            queryClient.invalidateQueries({ queryKey: ['client'] });
+        onSuccess: async () => {
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['players'] }),
+                queryClient.invalidateQueries({ queryKey: ['client'] }),
+                queryClient.invalidateQueries({ queryKey: ['games'] }),
+            ]);
         },
     });
 };

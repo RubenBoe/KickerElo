@@ -21,7 +21,7 @@ export const GameChip = ({
     const team2 = game.teamResults.find((t) => t.teamNumber === 2)!;
 
     return (
-        <Card>
+        <Card style={{flexShrink: 0}} >
             <CardContent>
                 <Stack alignItems={'center'}>
                     {!hideDate && (
