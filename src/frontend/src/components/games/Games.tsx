@@ -13,7 +13,8 @@ export interface GamesProps {
 
 export const Games = ({ client }: GamesProps) => {
     const { players } = useContext(ClientContext);
-    const { data: games } = useGetGames(client.seasons[0].seasonId);
+    const currentSeason = client.seasons.find(s => s.endDate === null)!;
+    const { data: games } = useGetGames(currentSeason.seasonId);
 
     const [enterGameDialogOpen, setEnterGameDialogOpen] = useState(false);
 

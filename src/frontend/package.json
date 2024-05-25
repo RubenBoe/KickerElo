@@ -14,6 +14,8 @@
     "@mui/icons-material": "^5.15.17",
     "@mui/material": "^5.15.17",
     "@tanstack/react-query": "^5.35.5",
+    "ag-charts-community": "^9.3.1",
+    "ag-charts-react": "^9.3.1",
     "axios": "^1.6.8",
     "react": "18.3.1",
     "react-dom": "18.3.1",
