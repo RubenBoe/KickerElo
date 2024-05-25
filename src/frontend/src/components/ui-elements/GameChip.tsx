@@ -66,7 +66,7 @@ const Team = ({ team, players, currentPlayer }: TeamProps) => {
     const isWinner = team.playerResults[0].eloGain > 0;
 
     return (
-        <Stack alignItems={'center'} flexGrow={1}>
+        <Stack alignItems={'center'} flexGrow={1} width={"48%"}>
             <Stack>
                 {team.playerResults.map((player) => (
                     <Typography
