@@ -37,6 +37,7 @@ namespace KickerEloBackend.Functions.Queries
 
             log.LogInformation($"Found {games.Count()} games for this player");
 
+            var playerGamesLookup = playerGames.ToLookup(x => x.GameID);
             var result = new PlayerDetailsResult()
             {
                 PlayerID = player.PlayerID,
@@ -46,7 +47,7 @@ namespace KickerEloBackend.Functions.Queries
                 FullName = player.FullName,
                 GamesPlayed = games.Select(g =>
                 {
-                    var correspondingPlayerGames = playerGames.Where(x => x.GameID == g.GameID);
+                    var correspondingPlayerGames = playerGamesLookup[g.GameID];
                     var teams = correspondingPlayerGames.GroupBy(x => x.Team).Select(grouping =>
                     {
                         return new TeamGameResult()
