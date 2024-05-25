@@ -8,27 +8,48 @@ export interface GameChipProps {
     game: GameResult;
     players: PlayerResult[];
     currentPlayer?: PlayerDetailsResult;
+    hideDate?: boolean;
 }
 
-export const GameChip = ({ game, players, currentPlayer }: GameChipProps) => {
+export const GameChip = ({
+    game,
+    players,
+    currentPlayer,
+    hideDate,
+}: GameChipProps) => {
     const team1 = game.teamResults.find((t) => t.teamNumber === 1)!;
     const team2 = game.teamResults.find((t) => t.teamNumber === 2)!;
 
     return (
         <Card>
             <CardContent>
-                <Stack direction="row" justifyContent={'space-between'} alignItems={"center"}>
-                    <Team
-                        team={team1}
-                        players={players}
-                        currentPlayer={currentPlayer}
-                    />
-                    :
-                    <Team
-                        team={team2}
-                        players={players}
-                        currentPlayer={currentPlayer}
-                    />
+                <Stack alignItems={'center'}>
+                    {!hideDate && (
+                        <Typography variant="body1">
+                            {game.date.toLocaleDateString('de', {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                            })}
+                        </Typography>
+                    )}
+                    <Stack
+                        direction="row"
+                        justifyContent={'space-between'}
+                        alignItems={'center'}
+                        width={'100%'}
+                    >
+                        <Team
+                            team={team1}
+                            players={players}
+                            currentPlayer={currentPlayer}
+                        />
+                        :
+                        <Team
+                            team={team2}
+                            players={players}
+                            currentPlayer={currentPlayer}
+                        />
+                    </Stack>
                 </Stack>
             </CardContent>
         </Card>
@@ -42,11 +63,10 @@ interface TeamProps {
 }
 
 const Team = ({ team, players, currentPlayer }: TeamProps) => {
-
     const isWinner = team.playerResults[0].eloGain > 0;
 
     return (
-        <Stack alignItems={"center"} flexGrow={1}>
+        <Stack alignItems={'center'} flexGrow={1}>
             <Stack>
                 {team.playerResults.map((player) => (
                     <Typography
@@ -61,12 +81,14 @@ const Team = ({ team, players, currentPlayer }: TeamProps) => {
                             players.find((p) => p.playerID === player.playerID)!
                                 .nickname
                         }
-                        &nbsp;
-                        ({player.eloGain > 0 && "+"}{player.eloGain})
+                        &nbsp; ({player.eloGain > 0 && '+'}
+                        {player.eloGain})
                     </Typography>
                 ))}
             </Stack>
-            <Typography variant='h3' color={isWinner ? "green" : "red"}>{team.points}</Typography>
+            <Typography variant="h3" color={isWinner ? 'green' : 'red'}>
+                {team.points}
+            </Typography>
         </Stack>
     );
 };
