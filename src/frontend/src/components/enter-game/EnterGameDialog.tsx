@@ -135,7 +135,10 @@ export const EnterGameDialog = (props: EnterGameDialogProps) => {
                                                         )?.nickname ?? ''
                                                 )
                                                 .join(', ') +
-                                                (winnerTeam.playerResults.length > 1 ? ' und ' : "") +
+                                                (winnerTeam.playerResults
+                                                    .length > 1
+                                                    ? ' und '
+                                                    : '') +
                                                 players.find(
                                                     (p) =>
                                                         winnerTeam
@@ -146,7 +149,14 @@ export const EnterGameDialog = (props: EnterGameDialogProps) => {
                                                         ].playerID ===
                                                         p.playerID
                                                 )?.nickname ?? '';
-                                        const message = `${teamNamesInMessage} ${winnerTeam.playerResults.length === 1 ? "hat" : "haben"} ${winnerTeam.playerResults[0].eloGain} Punkte gewonnen`
+                                        const message = `${teamNamesInMessage} ${
+                                            winnerTeam.playerResults.length ===
+                                            1
+                                                ? 'hat'
+                                                : 'haben'
+                                        } ${
+                                            winnerTeam.playerResults[0].eloGain
+                                        } Punkte gewonnen!`;
                                         showAlert(message, 'info');
                                         handleClose();
                                     });
