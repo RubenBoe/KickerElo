@@ -6,10 +6,14 @@ import {
     DialogContent,
     DialogTitle,
     Stack,
+    Typography,
 } from '@mui/material';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { TeamResultCommand } from 'src/models/TeamResultCommand';
-import { useEnterGame } from 'src/service/backend-service';
+import {
+    useCalculateExpectedOutcome,
+    useEnterGame,
+} from 'src/service/backend-service';
 import { EnterTeamControl } from './EnterTeamControl';
 import { ClientContext } from '../client-context/ClientContextProvider';
 import { Add } from '@mui/icons-material';
@@ -25,6 +29,8 @@ export const EnterGameDialog = (props: EnterGameDialogProps) => {
     const { clientID, players } = useContext(ClientContext);
     const { showAlert } = useContext(ContextComponentContext);
     const gameEnterer = useEnterGame();
+    const { mutateAsync: expectedOutcomeCalculatorExecutor, isPending } =
+        useCalculateExpectedOutcome(clientID!);
 
     const [team1, setTeam1] = useState<TeamResultCommand>({
         PlayerIDs: [],
@@ -36,6 +42,8 @@ export const EnterGameDialog = (props: EnterGameDialogProps) => {
         Points: 0,
         TeamNumber: 2,
     });
+    const [team1Expected, setTeam1Expected] = useState<number>();
+    const [team2Expected, setTeam2Expected] = useState<number>();
 
     const [newPlayerDialogOpen, setNewPlayerDialogOpen] = useState(false);
 
@@ -55,11 +63,29 @@ export const EnterGameDialog = (props: EnterGameDialogProps) => {
         props.onClose();
     };
 
-    const isValid =
+    useEffect(() => {
+        if (
+            team1.PlayerIDs.length === team2.PlayerIDs.length &&
+            team1.PlayerIDs.length > 0
+        ) {
+            expectedOutcomeCalculatorExecutor([
+                { TeamNumber: 1, PlayerIDs: team1.PlayerIDs },
+                { TeamNumber: 2, PlayerIDs: team2.PlayerIDs },
+            ]).then((res) => {
+                res.teams.forEach((t) => {
+                    if (t.teamNumber === 1) setTeam1Expected(t.points);
+                    if (t.teamNumber === 2) setTeam2Expected(t.points);
+                });
+            });
+        }
+    }, [expectedOutcomeCalculatorExecutor, team1.PlayerIDs, team2.PlayerIDs]);
+
+    const teamsValid =
         team1.PlayerIDs.length === team2.PlayerIDs.length && //Teams of different lengths aren't balanced yet
         team1.PlayerIDs.length > 0 &&
-        team2.PlayerIDs.length > 0 && // Have at least one player per team
-        team1.Points !== team2.Points; // Ties aren't supported yet
+        team2.PlayerIDs.length > 0; // Have at least one player per team
+
+    const isValid = teamsValid && team1.Points !== team2.Points; // Ties aren't supported yet
 
     return (
         <Dialog open={props.open} onClose={handleClose} fullWidth>
@@ -77,24 +103,44 @@ export const EnterGameDialog = (props: EnterGameDialogProps) => {
                 </Stack>
             </DialogTitle>
             <DialogContent>
-                <Stack
-                    direction={'row'}
-                    justifyContent={'space-between'}
-                    alignItems={'center'}
-                >
-                    <EnterTeamControl
-                        team={team1}
-                        onChange={(team) => setTeam1(team)}
-                        opponentTeamPlayerIDs={team2.PlayerIDs}
-                        isWinning={team1.Points > team2.Points}
-                    />
-                    :
-                    <EnterTeamControl
-                        team={team2}
-                        onChange={(team) => setTeam2(team)}
-                        opponentTeamPlayerIDs={team1.PlayerIDs}
-                        isWinning={team2.Points > team1.Points}
-                    />
+                <Stack gap={2}>
+                    <Stack
+                        direction={'row'}
+                        justifyContent={'space-between'}
+                        alignItems={'center'}
+                    >
+                        <EnterTeamControl
+                            team={team1}
+                            onChange={(team) => setTeam1(team)}
+                            opponentTeamPlayerIDs={team2.PlayerIDs}
+                            isWinning={team1.Points > team2.Points}
+                        />
+                        :
+                        <EnterTeamControl
+                            team={team2}
+                            onChange={(team) => setTeam2(team)}
+                            opponentTeamPlayerIDs={team1.PlayerIDs}
+                            isWinning={team2.Points > team1.Points}
+                        />
+                    </Stack>
+                    {teamsValid && (
+                        <Stack gap={1} alignItems={'center'}>
+                            <Typography color={theme => theme.palette.grey[500]}>Erwartetes Ergebnis</Typography>
+                            {isPending ? (
+                                <CircularProgress />
+                            ) : (
+                                <Typography color={theme => theme.palette.grey[500]}>
+                                    <Stack
+                                        direction={'row'}
+                                        justifyContent={'space-between'}
+                                        alignItems={'center'}
+                                    >
+                                        {team1Expected}:{team2Expected}
+                                    </Stack>
+                                </Typography>
+                            )}
+                        </Stack>
+                    )}
                 </Stack>
                 <AddPlayerDialog
                     open={newPlayerDialogOpen}

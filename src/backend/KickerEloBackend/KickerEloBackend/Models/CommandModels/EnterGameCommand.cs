@@ -8,13 +8,17 @@ namespace KickerEloBackend.Models.CommandModels
         public IEnumerable<Team> Teams { get; set; }
     }
 
-    internal class Team
+    internal class Team: TeamBase
+    {
+        public int Points { get; set; }
+    }
+
+    internal class TeamBase
     {
         public IEnumerable<string> PlayerIDs { get; set; }
         /// <summary>
         /// Should be 1 or 2
         /// </summary>
         public int TeamNumber { get; set; }
-        public int Points { get; set; }
     }
 }

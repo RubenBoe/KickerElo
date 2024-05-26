@@ -110,6 +110,47 @@ namespace KickerEloBackend.Models.Helpers
             return result;
         }
 
+        public static ExpectedOutcomeResult SimulateGame (TableServiceClient tableServiceClient, IEnumerable<TeamBase> teams, string currentSeasonID)
+        {
+            var teamElos = teams.ToDictionary(
+                t => t.TeamNumber,
+                t =>
+                {
+                    var playerElos = t.PlayerIDs.Select(p => GetCurrentElo(tableServiceClient, currentSeasonID, p).EloNumber);
+                    return playerElos.Average();
+                }
+                );
+
+            var firstTeamExpectationValue = GetExpectationValue(teamElos[1], teamElos[2]);
+
+            var firstTeamScore = 0;
+            var opponentScore = 0;
+            
+            Random rnd = new Random();
+            while (firstTeamScore < 10 && opponentScore < 10)
+            {
+                var diceRoll = rnd.NextDouble();
+
+                if(diceRoll < firstTeamExpectationValue)
+                {
+                    firstTeamScore++;
+                } else
+                {
+                    opponentScore++;
+                }
+            }
+
+            return new ExpectedOutcomeResult()
+            {
+                Teams = teams.Select(t => new Team()
+                {
+                    PlayerIDs = t.PlayerIDs,
+                    Points = t.TeamNumber == 1 ? firstTeamScore : opponentScore,
+                    TeamNumber = t.TeamNumber,
+                })
+            };
+        }
+
         public static PlayerElo GetCurrentElo (TableServiceClient tableService, string seasonId , string playerId)
         {
             var playerElo = tableService.GetTableClient(DatabaseTables.PlayerEloTable).Query<PlayerElo>(pe => pe.PlayerID == playerId && pe.SeasonID == seasonId).First();
@@ -124,10 +165,15 @@ namespace KickerEloBackend.Models.Helpers
         /// <returns>The new elo number</returns>
         public static int GetNewElo (double previousElo, double opponentElo, int outcome)
         {
-            var expectation = 1 / (1 + Math.Pow(10, (opponentElo - previousElo) / divisor));
+            var expectation = GetExpectationValue(previousElo, opponentElo);
             var newElo = previousElo + kNumber * (outcome - expectation);
 
             return (int)newElo;
+        }
+
+        public static double GetExpectationValue (double currentElo, double opponentElo) 
+        {
+            return 1 / (1 + Math.Pow(10, (opponentElo - currentElo) / divisor));
         }
     }
 }

@@ -6,10 +6,11 @@ import {
 } from '@tanstack/react-query';
 import axios from 'axios';
 import { ClientDetails } from 'src/models/ClientDetails';
+import { ExpectedOutcomeResult } from 'src/models/ExpectedOutcomeResult';
 import { GameResult } from 'src/models/GameResult';
 import { PlayerDetailsResult } from 'src/models/PlayerDetailsResult';
 import { PlayerResult } from 'src/models/PlayerResult';
-import { TeamResultCommand } from 'src/models/TeamResultCommand';
+import { TeamBase, TeamResultCommand } from 'src/models/TeamResultCommand';
 
 // const apiUrl = process.env["NX_API_URL"];
 const apiUrl = 'http://localhost:7123/api/';
@@ -137,3 +138,11 @@ export const useEnterGame = () => {
         },
     });
 };
+
+export const useCalculateExpectedOutcome = (clientID: string) => {
+    return useMutation({
+        mutationFn: (teams: TeamBase[]) => {
+            return axios.post<ExpectedOutcomeResult>(`${apiUrl}CalculateExpectedOutcome`, {ClientToken: clientID, Teams: teams }).then(res => res.data)
+        }
+    })
+}
