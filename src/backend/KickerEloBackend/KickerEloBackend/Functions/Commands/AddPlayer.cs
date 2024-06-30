@@ -28,27 +28,11 @@ namespace KickerEloBackend.Functions.Commands
                 string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
                 var data = JsonSerializer.Deserialize<AddPlayerCommand>(requestBody);
 
-                var tableService = TablesHelper.GetTableServiceClient();
-                var client = ClientHelper.GetClient(data.ClientToken, tableService);
+                using var conn = SqlHelper.GetSqlConnection();
 
                 var newPlayerId = Guid.NewGuid().ToString();
-                var newPlayer = new Player()
-                {
-                    ClientID = client.Id,
-                    Nickname = data.Nickname,
-                    FullName = data.FullName,
-                    PlayerID = newPlayerId,
-                    RowKey = newPlayerId
-                };
 
-                await tableService.GetTableClient(DatabaseTables.PlayersTable).AddEntityAsync(newPlayer);
-
-                var seasons = tableService.GetTableClient(DatabaseTables.SeasonsTable).Query<Season>(x => x.ClientID == client.Id);
-                var currentSeason = seasons.First(s => s.EndDate == null);
-
-                var newPlayerElo = new PlayerElo(newPlayerId, currentSeason.SeasonID, EloHelper.InitialEloNumber);
-
-                await tableService.GetTableClient(DatabaseTables.PlayerEloTable).AddEntityAsync(newPlayerElo);
+                var newPlayer = await PlayerHelper.InsertNewPlayer(data.ClientToken, data.Nickname, data.FullName, newPlayerId, EloHelper.InitialEloNumber, conn);
 
                 return new OkObjectResult(newPlayer);
             } catch (Exception e)

@@ -1,10 +1,8 @@
-﻿
-
-using Azure;
-using Azure.Data.Tables;
+﻿using Dapper;
 using KickerEloBackend.Models.CommandModels;
 using KickerEloBackend.Models.DatabaseModels;
 using KickerEloBackend.Models.Results;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +18,7 @@ namespace KickerEloBackend.Models.Helpers
         // Number used to divide by in the calculation of the expectation value. This is a random number. In the chess system, 400 is chosen
         private const int divisor = 400;
 
-        public static async Task<GameResult> CalculateAndUpdateResults(TableServiceClient tableService, Game game, EnterGameCommand gameCommand)
+        public static async Task<GameResult> CalculateAndUpdateResults(SqlConnection conn, Game game, EnterGameCommand gameCommand)
         {
             var result = new GameResult()
             {
@@ -38,32 +36,19 @@ namespace KickerEloBackend.Models.Helpers
             var winnerTeam = gameCommand.Teams.OrderBy(t => t.Points).Last();
             var loserTeam = gameCommand.Teams.OrderBy(t => t.Points).First();
 
-            var winnerTeamElo = winnerTeam.PlayerIDs.Select(p => GetCurrentElo(tableService, game.SeasonID, p)).Select(e => e.EloNumber).Average();
-            var loserTeamElo = loserTeam.PlayerIDs.Select(p => GetCurrentElo(tableService, game.SeasonID, p)).Select(e => e.EloNumber).Average();
+            var winnerTeamElo = winnerTeam.PlayerIDs.Select(p => GetCurrentElo(conn, game.SeasonID, p)).Select(e => e.EloNumber).Average();
+            var loserTeamElo = loserTeam.PlayerIDs.Select(p => GetCurrentElo(conn, game.SeasonID, p)).Select(e => e.EloNumber).Average();
 
             var newWinnerTeamElo = GetNewElo(winnerTeamElo, loserTeamElo, 1);
             var winnerTeamEloGain = (int)(newWinnerTeamElo - winnerTeamElo);
 
-            var eloTable = tableService.GetTableClient(DatabaseTables.PlayerEloTable);
-
             var winnerTeamPlayerResults = new List<PlayerGameResult>();
             var loserTeamPlayerResults = new List<PlayerGameResult>();
+
             // Update player games and player elos
             foreach (var playerId in winnerTeam.PlayerIDs)
             {
-                await tableService.GetTableClient(DatabaseTables.PlayerGameTable).AddEntityAsync(new PlayerGame()
-                {
-                    EloGain = winnerTeamEloGain,
-                    GameID = game.GameID,
-                    PlayerID = playerId,
-                    Points = winnerTeam.Points,
-                    Team = winnerTeam.TeamNumber,
-                    RowKey = $"{game.GameID}_{playerId}",
-                    ClientID = game.ClientID
-                });
-                var currentElo = GetCurrentElo(tableService, game.SeasonID, playerId);
-                var newElo = currentElo.EloNumber + winnerTeamEloGain;
-                await eloTable.UpdateEntityAsync(new PlayerElo(playerId, game.SeasonID, newElo), ETag.All);
+                var newElo = await PlayerHelper.InsertNewGame(game.GameID, playerId, winnerTeam.TeamNumber, winnerTeam.Points, winnerTeamEloGain, conn);
 
                 var resultPlayer = result.TeamResults.First(t => t.TeamNumber == winnerTeam.TeamNumber).PlayerResults.First(p => p.PlayerID == playerId);
                 resultPlayer.EloGain = winnerTeamEloGain;
@@ -72,19 +57,7 @@ namespace KickerEloBackend.Models.Helpers
             }
             foreach (var playerId in loserTeam.PlayerIDs)
             {
-                await tableService.GetTableClient(DatabaseTables.PlayerGameTable).AddEntityAsync(new PlayerGame()
-                {
-                    EloGain = -winnerTeamEloGain,
-                    GameID = game.GameID,
-                    PlayerID = playerId,
-                    Points = loserTeam.Points,
-                    Team = loserTeam.TeamNumber,
-                    RowKey = $"{game.GameID}_{playerId}",
-                    ClientID = game.ClientID
-                });
-                var currentElo = GetCurrentElo(tableService, game.SeasonID, playerId);
-                var newElo = currentElo.EloNumber - winnerTeamEloGain;
-                await eloTable.UpdateEntityAsync(new PlayerElo(playerId, game.SeasonID, newElo), ETag.All);
+                var newElo = await PlayerHelper.InsertNewGame(game.GameID, playerId, loserTeam.TeamNumber, loserTeam.Points, -winnerTeamEloGain, conn);
 
                 var resultPlayer = result.TeamResults.First(t => t.TeamNumber == loserTeam.TeamNumber).PlayerResults.First(p => p.PlayerID == playerId);
                 resultPlayer.EloGain = -winnerTeamEloGain;
@@ -110,9 +83,10 @@ namespace KickerEloBackend.Models.Helpers
             return result;
         }
 
-        public static PlayerElo GetCurrentElo (TableServiceClient tableService, string seasonId , string playerId)
+        public static PlayerElo GetCurrentElo (SqlConnection conn, string seasonId , string playerId)
         {
-            var playerElo = tableService.GetTableClient(DatabaseTables.PlayerEloTable).Query<PlayerElo>(pe => pe.PlayerID == playerId && pe.SeasonID == seasonId).First();
+            // WARNING: NOT ASYNC!
+            var playerElo = conn.QuerySingle<PlayerElo>("SELECT PlayerID, SeasonID, EloNumber, LastUpdated FROM playerElo WHERE SeasonID=@seasonId AND PlayerID=@playerId", new {seasonId, playerId});
             return playerElo;
         }
 

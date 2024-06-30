@@ -26,10 +26,7 @@ namespace KickerEloBackend.Functions.Commands
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var data = JsonSerializer.Deserialize<EnterGameCommand>(requestBody);
 
-            var tableService = TablesHelper.GetTableServiceClient();
-            var client = ClientHelper.GetClient(data.ClientToken, tableService);
-            var seasons = tableService.GetTableClient(DatabaseTables.SeasonsTable).Query<Season>(x => x.ClientID == client.Id);
-            var currentSeason = seasons.First(s => s.EndDate == null);
+            using var conn = SqlHelper.GetSqlConnection();
 
             // Validate input data
             if (
@@ -45,17 +42,9 @@ namespace KickerEloBackend.Functions.Commands
             }
 
             var newGameId = Guid.NewGuid().ToString();
-            var newGame = new Game()
-            {
-                ClientID = client.Id,
-                SeasonID = currentSeason.SeasonID,
-                GameID = newGameId,
-                RowKey = newGameId,
-                Date = DateTime.UtcNow
-            };
-            await tableService.GetTableClient(DatabaseTables.GamesTable).AddEntityAsync(newGame);
+            var newGame = await GameHelper.InsertGame(data.ClientToken, newGameId, conn);
 
-            var result = await EloHelper.CalculateAndUpdateResults(tableService, newGame, data);
+            var result = await EloHelper.CalculateAndUpdateResults(conn, newGame, data);
 
             return new OkObjectResult(result);
         }

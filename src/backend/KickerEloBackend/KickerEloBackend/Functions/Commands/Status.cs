@@ -17,37 +17,7 @@ namespace KickerEloBackend.Functions.Commands
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req)
         {
-            TableServiceClient client = TablesHelper.GetTableServiceClient();
-
-            TableClient clientsTable = client.GetTableClient(
-                tableName: DatabaseTables.ClientsTable
-            );
-            await clientsTable.CreateIfNotExistsAsync();
-
-            TableClient seasonsTable = client.GetTableClient(
-                tableName: DatabaseTables.SeasonsTable
-            );
-            await seasonsTable.CreateIfNotExistsAsync();
-
-            var playersTable = client.GetTableClient(
-                tableName: DatabaseTables.PlayersTable
-                );
-            await playersTable.CreateIfNotExistsAsync();
-
-            var gamesTable = client.GetTableClient(
-                tableName: DatabaseTables.GamesTable);
-            await gamesTable.CreateIfNotExistsAsync();
-
-            var playerGameTable = client.GetTableClient(
-                tableName: DatabaseTables.PlayerGameTable);
-            await playerGameTable.CreateIfNotExistsAsync();
-
-            var playerEloTable = client.GetTableClient(
-                tableName: DatabaseTables.PlayerEloTable);
-            await playerEloTable.CreateIfNotExistsAsync();
-
-
-
+            using var conn = SqlHelper.GetSqlConnection();
 
             return new OkObjectResult("Service running");
         }

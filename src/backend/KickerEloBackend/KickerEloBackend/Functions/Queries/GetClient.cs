@@ -12,6 +12,7 @@ using KickerEloBackend.Models.Results;
 using KickerEloBackend.Models;
 using KickerEloBackend.Models.DatabaseModels;
 using System.Linq;
+using Dapper;
 
 namespace KickerEloBackend.Functions.Queries
 {
@@ -22,17 +23,17 @@ namespace KickerEloBackend.Functions.Queries
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Client/{ClientToken}")] HttpRequest req, string ClientToken,
             ILogger log)
         {
-            var tableService = TablesHelper.GetTableServiceClient();
-            var client = ClientHelper.GetClient(ClientToken, tableService);
+            using var conn = SqlHelper.GetSqlConnection();
+            var client = await ClientHelper.GetClient(ClientToken, conn);
 
-            var playersTable = tableService.GetTableClient(DatabaseTables.PlayersTable);
-            var numberOfPlayers = playersTable.Query<Player>(x => x.ClientID == client.Id).Count();
+            var numberOfPlayers = await conn.QuerySingleAsync<int>(@"SELECT COUNT(*) as NumberOfPlayers
+            FROM players p
+            INNER JOIN clients c ON p.ClientID=c.Id
+            WHERE ClientToken=@ClientToken", new {ClientToken});
 
-            var seasons = tableService.GetTableClient(DatabaseTables.SeasonsTable).Query<Season>(x => x.ClientID == client.Id).OrderByDescending(x => x.StartDate);
-            var currentSeason = seasons.First(x => x.EndDate == null);
+            var seasons = await SeasonHelper.GetSeasons(ClientToken, conn);
 
-            var topEloPlayer = tableService.GetTableClient(DatabaseTables.PlayerEloTable).Query<PlayerElo>(x => x.SeasonID == currentSeason.SeasonID).OrderByDescending(x => x.EloNumber).First();
-            var topEloPlayerInfo = playersTable.Query<Player>(x => x.PlayerID == topEloPlayer.PlayerID && x.ClientID == client.Id).First();
+            var leader = await PlayerHelper.GetLeader(ClientToken, conn);
 
             var result = new ClientDetails()
             {
@@ -40,13 +41,7 @@ namespace KickerEloBackend.Functions.Queries
                 CreationDate = client.CreationDate,
                 NumberOfPlayers = numberOfPlayers,
                 Seasons = seasons.Select(season => new SeasonResult(season)),
-                CurrentLeader = new PlayerResult()
-                {
-                    PlayerID = topEloPlayer.PlayerID,
-                    EloNumber = topEloPlayer.EloNumber,
-                    LastUpdated = topEloPlayer.LastUpdated,
-                    Nickname = topEloPlayerInfo.Nickname
-                }
+                CurrentLeader = leader
             };
 
             return new OkObjectResult(result);

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace KickerEloBackend.Models.DatabaseModels
 {
-    internal class PlayerElo : AbstractEntityClass
+    internal class PlayerElo
     {
         public PlayerElo() { }
         public PlayerElo(string PlayerID, string SeasonID, int EloNumber) 
@@ -14,8 +14,6 @@ namespace KickerEloBackend.Models.DatabaseModels
             this.PlayerID = PlayerID;
             this.SeasonID = SeasonID;
             this.EloNumber = EloNumber;
-            LastUpdated = DateTime.UtcNow;
-            RowKey = $"{SeasonID}_{PlayerID}";
         }
         public string PlayerID { get; set; }
         public string SeasonID { get; set; }

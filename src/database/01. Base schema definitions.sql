@@ -60,7 +60,7 @@ CREATE TABLE dbo.playerGame (
     Team INT NOT NULL,
     Points INT NOT NULL,
     EloGain INT NOT NULL,
-    CONSTRAINT UC_PlayerID_SeasonID UNIQUE (PlayerID, SeasonID)
+    CONSTRAINT UC_PlayerID_GameID UNIQUE (PlayerID, GameID)
 )
 
 GO

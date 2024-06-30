@@ -26,43 +26,14 @@ namespace KickerEloBackend.Functions.Commands
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var data = JsonSerializer.Deserialize<StartSeasonCommand>(requestBody);
 
-            var tableService = TablesHelper.GetTableServiceClient();
-
-            var client = ClientHelper.GetClient(data.ClientToken, tableService);
-
-            var seasonsTable = tableService.GetTableClient(DatabaseTables.SeasonsTable);
-            var seasons = seasonsTable.Query<Season>(x => x.ClientID == client.Id);
-
-            var newSeasonNumber = 1;
-            if (seasons.Any())
-            {
-                var currentSeason = seasons.First(s => s.EndDate == null);
-
-                // end current season
-                currentSeason.EndDate = DateTime.UtcNow;
-                await seasonsTable.UpdateEntityAsync(currentSeason, ETag.All);
-
-                newSeasonNumber = currentSeason.SeasonNumber + 1;
-            }
+            using var conn = SqlHelper.GetSqlConnection();
 
             var newSeasonId = Guid.NewGuid().ToString();
-            var newSeason = new Season()
-            {
-                SeasonNumber = newSeasonNumber,
-                SeasonID = newSeasonId,
-                StartDate = DateTime.UtcNow,
-                ClientID = client.Id,
-                RowKey = newSeasonId
-            };
-            await seasonsTable.AddEntityAsync(newSeason);
+
+            var newSeason = await SeasonHelper.StartNewSeason(data.ClientToken, newSeasonId, conn);
 
             // Reset Elo numbers of all players for new season
-            var players = tableService.GetTableClient(DatabaseTables.PlayersTable).Query<Player>(p => p.ClientID == client.Id);
-            foreach (var player in players)
-            {
-                var newPlayerElo = new PlayerElo(player.PlayerID, newSeasonId, EloHelper.InitialEloNumber);
-                await tableService.GetTableClient(DatabaseTables.PlayerEloTable).AddEntityAsync(newPlayerElo);
-            }
+            await PlayerHelper.StartNewSeason(data.ClientToken, newSeasonId, EloHelper.InitialEloNumber, conn);
 
             return new OkObjectResult(newSeason);
         }

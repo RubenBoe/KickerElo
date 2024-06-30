@@ -2,7 +2,7 @@
 
 namespace KickerEloBackend.Models.DatabaseModels
 {
-    internal class Season : AbstractEntityClass
+    internal class Season
     {
         public string SeasonID { get; set; }
         public int ClientID { get; set; }

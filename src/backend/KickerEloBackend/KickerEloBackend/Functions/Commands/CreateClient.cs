@@ -24,21 +24,13 @@ namespace KickerEloBackend.Functions.Commands
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var client = JsonSerializer.Deserialize<Client>(requestBody);
 
-            TableServiceClient tableServiceClient = TablesHelper.GetTableServiceClient();
+            using var conn = SqlHelper.GetSqlConnection();
 
-            var clientsTable = tableServiceClient.GetTableClient(DatabaseTables.ClientsTable);
-            var currentClients = clientsTable.Query<Client>(x => true);
-            var currentHighestID = currentClients.Count() > 0 ? currentClients.Select(c => c.Id).Max() : 0;
-
-            // Set new client's ID to the highest one available
-            client.Id = currentHighestID + 1;
-            client.RowKey = client.Id.ToString();
             var newClientGuid = Guid.NewGuid().ToString();
-            client.ClientToken = newClientGuid;
 
-            await clientsTable.AddEntityAsync(client);
+            var newClient = await ClientHelper.InsertNewClient(client.ClientName, newClientGuid, conn);
 
-            return new OkObjectResult(client);
+            return new OkObjectResult(newClient);
         }
     }
 }
