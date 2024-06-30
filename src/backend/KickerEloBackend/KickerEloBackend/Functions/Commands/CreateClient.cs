@@ -6,10 +6,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using System.Text.Json;
 using KickerEloBackend.Models.DatabaseModels;
-using Azure.Data.Tables;
 using System;
-using KickerEloBackend.Models;
-using System.Linq;
 using KickerEloBackend.Models.Helpers;
 
 namespace KickerEloBackend.Functions.Commands

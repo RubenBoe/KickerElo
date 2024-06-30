@@ -1,8 +1,6 @@
-﻿using Azure.Data.Tables;
-using Dapper;
+﻿using Dapper;
 using KickerEloBackend.Models.DatabaseModels;
 using Microsoft.Data.SqlClient;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace KickerEloBackend.Models.Helpers
