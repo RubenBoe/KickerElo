@@ -68,5 +68,26 @@ namespace KickerEloBackend.Models.Helpers
                 INNER JOIN clients c ON c.Id = s.ClientID
                 WHERE c.ClientToken=@ClientToken AND s.EndDate IS NULL", new { ClientToken, GameID });
         }
+
+        public async static Task RevertLastGame(string ClientToken, SqlConnection connection)
+        {
+            await connection.ExecuteAsync(@"
+                DECLARE @LastGameID nvarchar(200) = (SELECT TOP 1 g.GameID
+                FROM games g
+                INNER JOIN seasons s ON g.SeasonID=s.SeasonID 
+                INNER JOIN clients c ON c.Id=s.ClientID
+                WHERE c.ClientToken=@ClientToken AND s.EndDate IS NULL
+                ORDER BY g.Date DESC)
+
+                UPDATE pe
+                SET pe.EloNumber = pe.EloNumber - pg.EloGain
+                FROM playerElo pe
+                INNER JOIN seasons s ON s.SeasonID=pe.SeasonID
+                INNER JOIN playerGame pg ON pe.PlayerID=pg.PlayerID
+                WHERE s.EndDate IS NULL AND pg.GameID=@LastGameID
+
+                DELETE FROM playerGame WHERE GameID=@LastGameID
+                DELETE FROM games WHERE GameID=@LastGameID", new {ClientToken});
+        }
     }
 }
